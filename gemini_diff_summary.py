@@ -2,6 +2,8 @@ import os
 import requests
 import subprocess
 from typing import Any, Dict
+from rich.console import Console
+from rich.markdown import Markdown
 
 def get_gemini_response(prompt: str) -> Dict[str, Any]:
     "send a prompt to gemini AI and return the response"
@@ -35,7 +37,16 @@ def main() -> None:
     "main function"
 
     try:
-        diff_command = "git --no-pager diff"
+        import argparse
+        parser = argparse.ArgumentParser(description='Summarize git diff changes')
+        parser.add_argument('--from', dest='from_ref', help='Git reference to diff from (branch, commit SHA, etc)')
+        parser.add_argument('--term', action='store_true', help='Enable terminal formatting with colors')
+        args = parser.parse_args()
+
+        if args.from_ref:
+            diff_command = f"git --no-pager diff {args.from_ref}"
+        else:
+            diff_command = "git --no-pager diff"
         diff_output = subprocess.check_output(diff_command, shell=True, text=True)
         prompt = f"Give a title and summarize the following git diff output using a markdown format:\n{diff_output}"
         response = get_gemini_response(prompt)
@@ -49,10 +60,18 @@ def main() -> None:
                 if "content" in candidate and "parts" in candidate["content"]:
                     for part in candidate["content"]["parts"]:
                         if "text" in part:
-                            print("\nGemini Summary:")
-                            print("-" * 40)
-                            print(part["text"])
-                            print("-" * 40)
+                            if args.term:
+                                console = Console()
+                                console.print("\n[bold]Gemini Summary:[/bold]")
+                                console.print("─" * 40)
+                                md = Markdown(part["text"])
+                                console.print(md)
+                                console.print("─" * 40)
+                            else:
+                                print("\nGemini Summary:")
+                                print("-" * 40)
+                                print(part["text"])
+                                print("-" * 40)
                             
                             # Print token usage if available
                             if "usageMetadata" in response:

@@ -1,9 +1,13 @@
 [project]
 name = "mr-summary"
 version = "0.1.0"
-description = "Add your description here"
+description = "A tool to summarize git diffs using Gemini AI"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "requests>=2.32.3",
+    "rich>=13.7.0",
 ]
+
+[project.scripts]
+mr-summary = "gemini_diff_summary:main"
