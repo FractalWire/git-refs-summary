@@ -38,13 +38,32 @@ def main() -> None:
 
     try:
         import argparse
-        parser = argparse.ArgumentParser(description='Summarize git diff changes')
-        parser.add_argument('--from', dest='from_ref', help='Git reference to diff from (branch, commit SHA, etc)')
-        parser.add_argument('--term', action='store_true', help='Enable terminal formatting with colors')
+        parser = argparse.ArgumentParser(
+            description='Summarize git diff changes using Gemini AI',
+            epilog='Example: mr-summary --from main --to HEAD'
+        )
+        parser.add_argument(
+            '--from', 
+            dest='from_ref', 
+            help='Git reference to diff from (branch, commit SHA, etc). If not provided, shows unstaged changes'
+        )
+        parser.add_argument(
+            '--to',
+            dest='to_ref',
+            help='Git reference to diff to (branch, commit SHA, etc). If not provided, uses current working tree'
+        )
+        parser.add_argument(
+            '--no-term',
+            action='store_true',
+            help='Disable terminal formatting and markdown rendering'
+        )
         args = parser.parse_args()
 
         if args.from_ref:
-            diff_command = f"git --no-pager diff {args.from_ref}"
+            if args.to_ref:
+                diff_command = f"git --no-pager diff {args.from_ref}..{args.to_ref}"
+            else:
+                diff_command = f"git --no-pager diff {args.from_ref}"
         else:
             diff_command = "git --no-pager diff"
         diff_output = subprocess.check_output(diff_command, shell=True, text=True)
@@ -60,7 +79,16 @@ def main() -> None:
                 if "content" in candidate and "parts" in candidate["content"]:
                     for part in candidate["content"]["parts"]:
                         if "text" in part:
-                            if args.term:
+                            # Print the git refs being used
+                            if args.from_ref or args.to_ref:
+                                refs_msg = "\nAnalyzing changes "
+                                if args.from_ref:
+                                    refs_msg += f"from '{args.from_ref}'"
+                                    if args.to_ref:
+                                        refs_msg += f" to '{args.to_ref}'"
+                                print(refs_msg)
+
+                            if not args.no_term:
                                 console = Console()
                                 console.print("\n[bold]Gemini Summary:[/bold]")
                                 console.print("─" * 40)
