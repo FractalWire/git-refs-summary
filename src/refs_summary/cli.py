@@ -8,7 +8,6 @@ from rich.markdown import Markdown
 
 def get_gemini_response(prompt: str) -> Dict[str, Any]:
     """Send a prompt to gemini AI and return the response"""
-    "send a prompt to gemini AI and return the response"
 
     api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
     api_key = os.getenv("GEMINI_API_KEY")
@@ -17,7 +16,9 @@ def get_gemini_response(prompt: str) -> Dict[str, Any]:
 
     headers = {"Content-Type": "application/json"}
     params = {"key": api_key}
-    data = {"contents": [{"parts": [{"text": prompt}]}]}
+    data = {"system_instruction": {
+        "parts": {"text": "You will give a summary of the git diff between two git references (SHA, branch, etc.). You will give an appropriate title for the changes. As for the summary, you will avoid being too exhaustive and will focus mostly on the new features or key refactoring introduced by the changes. Don't give too much importance on file potentially automatically generated or new tests. Finally, you will list a short TODO list that could include if applicable: missing tests for new features or behaviours introduced in the changes, simplification of complicated code, modification of code that might introduce errors."}},
+            "contents": {"parts": {"text": prompt}}}
     response = requests.post(api_url, headers=headers, params=params, json=data)
     return response.json()
 
@@ -84,26 +85,22 @@ def print_summary(
 ) -> None:
     """Print the summary with optional formatting and usage statistics"""
     # Print the git refs being used
-    if from_ref or to_ref:
-        refs_msg = "\nAnalyzing changes "
-        if from_ref:
-            refs_msg += f"from '{from_ref}'"
-            if to_ref:
-                refs_msg += f" to '{to_ref}'"
-        print(refs_msg)
+    refs_msg = "\nAnalyzing changes "
+    if not from_ref:
+        refs_msg += f"for unstage changes"
+    elif from_ref:
+        refs_msg += f"from '{from_ref}'"
+        if to_ref:
+            refs_msg += f" to '{to_ref}'"
+    print(refs_msg)
 
     if not no_term:
         console = Console()
-        console.print("\n[bold]Gemini Summary:[/bold]")
-        console.print("─" * 40)
         md = Markdown(text)
         console.print(md)
-        console.print("─" * 40)
     else:
-        print("\nGemini Summary:")
         print("-" * 40)
         print(text)
-        print("-" * 40)
 
     # Print token usage if available
     if usage:
@@ -127,7 +124,7 @@ def main() -> None:
             diff_command = "git --no-pager diff"
 
         diff_output = subprocess.check_output(diff_command, shell=True, text=True)
-        prompt = f"Give a title and summarize the following git diff output using a markdown format:\n{diff_output}"
+        prompt = f"Here is the git diff:\n{diff_output}"
         response = get_gemini_response(prompt)
 
         text, usage = parse_gemini_response(response)
