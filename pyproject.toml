@@ -1,5 +1,5 @@
 [project]
-name = "mr-summary"
+name = "refs-summary"
 version = "0.1.0"
 description = "A tool to summarize git diffs using Gemini AI"
 readme = "README.md"
@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mr-summary = "mr_summary.cli:main"
+refs-summary = "refs_summary.cli:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]

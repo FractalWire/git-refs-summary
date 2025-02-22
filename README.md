@@ -1,4 +1,4 @@
-# mr-summary
+# refs-summary
 
 A tool to summarize git diffs using Gemini AI.
 
@@ -14,7 +14,7 @@ source .venv/bin/activate  # On Unix/MacOS
 
 Then install the package:
 ```bash
-uv pip install git+https://github.com/yourusername/mr-summary.git
+uv pip install git+https://github.com/yourusername/refs-summary.git
 ```
 
 ## Usage
@@ -27,19 +27,19 @@ export GEMINI_API_KEY=your_api_key
 Then run in any git repository:
 ```bash
 # Show help
-git-mr-summary --help
+refs-summary --help
 
 # Show summary of unstaged changes
-git-mr-summary
+refs-summary
 
 # Show summary of changes from a specific reference
-git-mr-summary --from main
+refs-summary --from main
 
 # Compare changes between two references
-git-mr-summary --from main --to HEAD
+refs-summary --from main --to HEAD
 
 # Disable terminal formatting (plain text output)
-git-mr-summary --no-term
+refs-summary --no-term
 ```
 
 ## Options
@@ -54,8 +54,8 @@ To set up for development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mr-summary.git
-cd mr-summary
+git clone https://github.com/yourusername/refs-summary.git
+cd refs-summary
 
 # Create and activate virtual environment
 uv venv
