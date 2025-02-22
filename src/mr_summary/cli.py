@@ -58,7 +58,11 @@ def parse_args():
     import argparse
     parser = argparse.ArgumentParser(
         description='Summarize git diff changes using Gemini AI',
-        epilog='Example: mr-summary --from main --to HEAD'
+        epilog='Examples:\n'
+               '  git-mr-summary                    # Show unstaged changes\n'
+               '  git-mr-summary --from main        # Compare with main branch\n'
+               '  git-mr-summary --from HEAD~3      # Compare with 3 commits ago\n'
+               '  git-mr-summary --from v1.0 --to v2.0  # Compare two refs'
     )
     parser.add_argument(
         '--from', 
